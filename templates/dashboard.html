@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Dashboard · GPGC Nowshera{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">OVERVIEW</p><h1>College dashboard</h1><p class="muted mb-0">{{ college.name }} · Your academic operations at a glance.</p></div><span class="tenant-pill">● Secure tenant workspace</span></div>
+<div class="row g-3 mt-2">{% for label,value,icon in [('Students',counts.students,'♙'),('Courses',counts.courses,'▤'),('Attendance records',counts.attendance,'✓'),('Examinations',counts.exams,'✎'),('Result records',counts.results,'▥'),('Unpaid invoices',counts.unpaid,'₨')] %}<div class="col-12 col-sm-6 col-xl-4"><div class="stat-card"><div class="stat-icon">{{ icon }}</div><div class="stat-value">{{ value }}</div><div class="stat-label">{{ label }}</div></div></div>{% endfor %}</div>
+<div class="section-card mt-4"><h2>Quick actions</h2><p class="muted">Open a module to create and review records.</p><div class="quick-grid">{% for key,cfg in module_config.items() %}{% if current_user.role in cfg.roles %}<a class="quick-link" href="{{ url_for('module_page',module_key=key) }}"><span>{{ cfg.title }}</span><span>→</span></a>{% endif %}{% endfor %}</div></div>
+<div class="notice mt-4"><strong>Prototype status:</strong> This is a runnable SaaS foundation. Before live college deployment, complete backups, email delivery, audit-log review, and formal acceptance testing.</div>
+{% endblock %}
