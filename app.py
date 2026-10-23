@@ -360,6 +360,25 @@ def create_app(test_config=None):
     if environment not in {"production", "prod"} or os.getenv("BOOTSTRAP_DB", "").lower() == "true":
         with app.app_context():
             db.create_all()
+            # One-time production bootstrap: create the initial college administrator only
+            # when no admin account exists. Disable BOOTSTRAP_DB after first successful start.
+            if environment in {"production", "prod"} and os.getenv("BOOTSTRAP_DB", "").lower() == "true":
+                initial_password = os.getenv("INITIAL_ADMIN_PASSWORD", "")
+                if len(initial_password) < 14:
+                    raise RuntimeError("Set INITIAL_ADMIN_PASSWORD to a unique password of at least 14 characters before enabling BOOTSTRAP_DB.")
+                college = College.query.filter_by(code="GPGC-NSR").first()
+                if not college:
+                    college = College(name="GPGC Nowshera", code="GPGC-NSR")
+                    db.session.add(college)
+                    db.session.flush()
+                admin_email = os.getenv("INITIAL_ADMIN_EMAIL", "admin@gpgc.local").strip().lower()
+                existing_admin = User.query.filter_by(email=admin_email).first()
+                if not existing_admin:
+                    admin = User(college_id=college.id, full_name="System Administrator",
+                                 email=admin_email, role="admin", active=True)
+                    admin.set_password(initial_password)
+                    db.session.add(admin)
+                    db.session.commit()
     return app
 
 def init_demo():
