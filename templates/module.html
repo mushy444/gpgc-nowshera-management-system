@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}{{ config.title }} · GPGC Nowshera{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">ACADEMIC OPERATIONS</p><h1>{{ config.title }}</h1><p class="muted mb-0">Create a record and review recent entries in your college workspace.</p></div><span class="count-pill">{{ records|length }} recent records</span></div>
+<div class="section-card mt-4"><h2>Add new record</h2>
+<form method="post" class="row g-3 mt-1"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% for field,label,kind,required in config.fields %}<div class="col-12 col-md-6 col-xl-4"><label class="form-label">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label>
+{% if kind.startswith('select:') %}<select class="form-select" name="{{ field }}" {% if required %}required{% endif %}><option value="">Choose…</option>{% for option in kind.split(':',1)[1].split(',') %}<option>{{ option }}</option>{% endfor %}</select>
+{% else %}<input class="form-control" name="{{ field }}" type="{{ kind }}" {% if required %}required{% endif %} {% if kind=='number' %}step="any" min="0"{% endif %}>{% endif %}</div>{% endfor %}
+<div class="col-12"><button class="btn btn-primary px-4">Save record</button></div></form></div>
+<div class="section-card mt-4"><div class="d-flex justify-content-between align-items-center mb-3"><h2 class="mb-0">Recent records</h2><span class="muted small">Latest 300 entries</span></div>
+<div class="table-responsive"><table class="table align-middle"><thead><tr>{% for field,label in config.columns %}<th>{{ label }}</th>{% endfor %}</tr></thead><tbody>
+{% for record in records %}<tr>{% for field,label in config.columns %}<td>{{ record|attr(field) or '—' }}</td>{% endfor %}</tr>{% else %}<tr><td colspan="{{ config.columns|length }}" class="empty-state">No records yet. Use the form above to add the first one.</td></tr>{% endfor %}
+</tbody></table></div></div>{% endblock %}
